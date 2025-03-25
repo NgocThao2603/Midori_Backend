@@ -2,6 +2,10 @@ source "https://rubygems.org"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 8.0.2"
+gem "rack-cors"
+gem "bcrypt"
+gem "jwt"
+gem "dotenv-rails"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use mysql as the database for Active Record
@@ -54,6 +58,7 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+  gem "pry-rails"
 end
 
 group :test do
@@ -61,3 +66,8 @@ group :test do
   gem "capybara"
   gem "selenium-webdriver"
 end
+
+gem "nokogiri", "~> 1.18"
+gem "httparty", "~> 0.22.0"
+
+gem "webdrivers", "~> 5.2"
