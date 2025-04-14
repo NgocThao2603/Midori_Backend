@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_03_18_101812) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_08_152652) do
   create_table "chapters", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "title", null: false
     t.column "level", "enum('N3','N2','N1')", null: false
@@ -45,6 +45,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_18_101812) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["vocabulary_id"], name: "index_examples_on_vocabulary_id"
+  end
+
+  create_table "jwt_denylist", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "jti"
+    t.datetime "exp"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["jti"], name: "index_jwt_denylist_on_jti"
   end
 
   create_table "lessons", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -138,16 +146,33 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_18_101812) do
     t.index ["lesson_id"], name: "index_tests_on_lesson_id"
   end
 
+  create_table "user_exercise_statuses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "lesson_id", null: false
+    t.string "exercise_type"
+    t.boolean "done", default: false
+    t.datetime "done_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["lesson_id"], name: "index_user_exercise_statuses_on_lesson_id"
+    t.index ["user_id", "lesson_id", "exercise_type"], name: "index_user_lesson_exercise_unique", unique: true
+    t.index ["user_id"], name: "index_user_exercise_statuses_on_user_id"
+  end
+
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "username", null: false
     t.string "email", null: false
-    t.string "password_digest", null: false
     t.date "dob", null: false
     t.string "phone"
     t.bigint "point", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
   create_table "vocabularies", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -178,5 +203,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_03_18_101812) do
   add_foreign_key "test_questions", "questions"
   add_foreign_key "test_questions", "test_attempts"
   add_foreign_key "tests", "lessons"
+  add_foreign_key "user_exercise_statuses", "lessons"
+  add_foreign_key "user_exercise_statuses", "users"
   add_foreign_key "vocabularies", "lessons"
 end
