@@ -1,14 +1,29 @@
+require "devise"
+
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  devise_for :users,
+    path: "api",
+    path_names: {
+      sign_in: "login",
+      sign_out: "logout",
+      registration: "register"
+    },
+    controllers: {
+      registrations: "api/registrations",
+      sessions: "api/sessions"
+    },
+    defaults: { format: :json }
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  namespace :api, defaults: { format: :json } do
+    post "/check_existing", to: "auth#check_existing"
+
+    resources :chapters, only: [ :index ] do
+      resources :lessons, only: [ :index ]
+    end
+
+    get "profile", to: "users#profile"
+    get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"
+    get "lesson_statuses", to: "lesson_statuses#index"
+  end
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  # root "posts#index"
 end
