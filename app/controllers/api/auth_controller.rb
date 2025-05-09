@@ -9,7 +9,7 @@ module Api
           return
         end
       end
-      
+
       if params[:email].present?
         user = User.find_by(email: params[:email])
         if user

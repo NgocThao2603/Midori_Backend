@@ -21,6 +21,8 @@ Rails.application.routes.draw do
       resources :lessons, only: [ :index ]
     end
 
+    resources :questions, only: [ :index ]
+
     get "profile", to: "users#profile"
     get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"
     get "lesson_statuses", to: "lesson_statuses#index"

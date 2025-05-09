@@ -8,7 +8,7 @@ module Api
       render json: {
         message: "Đăng nhập thành công!",
         user: resource,
-        token: request.env['warden-jwt_auth.token']
+        token: request.env["warden-jwt_auth.token"]
       }, status: :ok
     end
 
