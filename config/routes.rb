@@ -22,6 +22,7 @@ Rails.application.routes.draw do
     end
 
     resources :questions, only: [ :index ]
+    resources :audio_files, only: [ :index ]
 
     get "profile", to: "users#profile"
     get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"

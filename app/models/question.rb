@@ -5,4 +5,6 @@ class Question < ApplicationRecord
   belongs_to :vocabulary, optional: true
   belongs_to :phrase, optional: true
   belongs_to :example, optional: true
+
+  has_many :example_tokens, through: :example
 end
