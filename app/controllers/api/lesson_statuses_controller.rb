@@ -26,5 +26,29 @@ module Api
 
       render json: status_map
     end
+
+    def update
+      exercise_type = params.dig(:user_exercise_status, :exercise_type)
+      lesson_id = params[:id]
+
+      unless exercise_type && lesson_id
+        render json: { error: "Missing exercise_type or lesson_id" }, status: :unprocessable_entity
+        return
+      end
+
+      status = UserExerciseStatus.find_or_initialize_by(
+        user_id: current_user.id,
+        lesson_id: lesson_id,
+        exercise_type: exercise_type
+      )
+
+      status.done = true
+
+      if status.save
+        render json: { message: "Status updated successfully" }, status: :ok
+      else
+        render json: { error: status.errors.full_messages }, status: :unprocessable_entity
+      end
+    end
   end
 end
