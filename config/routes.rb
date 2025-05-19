@@ -23,10 +23,13 @@ Rails.application.routes.draw do
 
     resources :questions, only: [ :index ]
     resources :audio_files, only: [ :index ]
+    resource :point, only: [ :show, :update ]
+    resources :lesson_statuses, only: [ :index ]
 
     get "profile", to: "users#profile"
     get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"
-    get "lesson_statuses", to: "lesson_statuses#index"
+    patch "lesson_statuses/:id", to: "lesson_statuses#update"
+    get "lesson_meanings/lesson/:lesson_id", to: "lesson_meanings#index"
   end
   get "up" => "rails/health#show", as: :rails_health_check
 end
