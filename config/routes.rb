@@ -25,7 +25,9 @@ Rails.application.routes.draw do
     resources :audio_files, only: [ :index ]
     resource :point, only: [ :show, :update ]
     resources :lesson_statuses, only: [ :index ]
+    resources :test_attempts, only: [ :show, :create ]
 
+    get "lessons/:lesson_id/tests", to: "tests#by_lesson"
     get "profile", to: "users#profile"
     get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"
     patch "lesson_statuses/:id", to: "lesson_statuses#update"
