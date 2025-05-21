@@ -1,5 +1,20 @@
 module Api
   class TestAttemptsController < ApplicationController
+    def index
+      if params[:test_id].present?
+        test_attempts = TestAttempt.where(test_id: params[:test_id])
+                                  .where(user_id: current_user.id)
+                                  .order(created_at: :desc)
+
+        render json: test_attempts.as_json(only: [
+          :id, :test_id, :user_id, :status, :score,
+          :start_time, :end_time, :answered_count, :created_at
+        ])
+      else
+        render json: { error: "Missing test_id" }, status: :bad_request
+      end
+    end
+
     def show
       test_attempt = TestAttempt.includes(test_questions: :question).find(params[:id])
 
