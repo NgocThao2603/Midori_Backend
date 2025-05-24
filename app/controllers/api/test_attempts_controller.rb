@@ -27,6 +27,11 @@ module Api
         start_time: test_attempt.start_time,
         end_time: test_attempt.end_time,
         answered_count: test_attempt.answered_count,
+        test: {
+          id: test_attempt.test_id,
+          lesson_id: test_attempt.test.lesson_id,
+          duration_minutes: test_attempt.test.duration_minutes
+        },
         questions: test_attempt.test_questions.map do |taq|
           {
             question_id: taq.question_id,
@@ -91,10 +96,7 @@ module Api
         )
       end
 
-      render json: {
-        test_attempt: test_attempt,
-        test_questions: all_questions.map { |q| { id: q.id, type: q.question_type } }
-      }, status: :created
+      render json: { id: test_attempt.id }, status: :created
     end
 
     private

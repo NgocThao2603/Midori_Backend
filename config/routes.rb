@@ -25,7 +25,10 @@ Rails.application.routes.draw do
     resources :audio_files, only: [ :index ]
     resource :point, only: [ :show, :update ]
     resources :lesson_statuses, only: [ :index ]
-    resources :test_attempts, only: [ :index, :show, :create ]
+    resources :test_attempts, only: [ :index, :show, :create ] do
+      resources :test_answers, only: [ :index ]
+      post "test_answers/update_or_create", to: "test_answers#update_or_create"
+    end
 
     get "lessons/:lesson_id/tests", to: "tests#by_lesson"
     get "profile", to: "users#profile"
