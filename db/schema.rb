@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_14_140747) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_20_095144) do
   create_table "audio_files", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "vocabulary_id"
     t.bigint "phrase_id"
@@ -133,11 +133,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_14_140747) do
     t.bigint "user_id", null: false
     t.bigint "test_id", null: false
     t.datetime "start_time", null: false
-    t.datetime "end_time", null: false
+    t.datetime "end_time"
     t.integer "score"
-    t.column "status", "enum('in_progress','completed')", default: "in_progress", null: false
+    t.column "status", "enum('in_progress','completed','abandoned')", default: "in_progress", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "answered_count", default: 0, null: false
     t.index ["test_id"], name: "index_test_attempts_on_test_id"
     t.index ["user_id"], name: "index_test_attempts_on_user_id"
   end
@@ -155,10 +156,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_14_140747) do
   create_table "tests", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "lesson_id", null: false
     t.string "title", null: false
-    t.integer "total_score", null: false
-    t.integer "pass_score", null: false
+    t.integer "total_score", default: 100, null: false
+    t.integer "pass_score", default: 75, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "duration_minutes", default: 30, null: false
     t.index ["lesson_id"], name: "index_tests_on_lesson_id"
   end
 

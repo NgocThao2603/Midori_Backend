@@ -7,4 +7,6 @@ class Question < ApplicationRecord
   belongs_to :example, optional: true
 
   has_many :example_tokens, through: :example
+  has_many :test_questions
+  has_many :test_attempts, through: :test_questions
 end
