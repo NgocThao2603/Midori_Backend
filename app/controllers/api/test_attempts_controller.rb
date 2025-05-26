@@ -1,5 +1,8 @@
 module Api
   class TestAttemptsController < ApplicationController
+    before_action :set_test_attempt, only: [ :show, :submit ]
+    before_action :authenticate_user!
+
     def index
       if params[:test_id].present?
         test_attempts = TestAttempt.where(test_id: params[:test_id])
@@ -16,6 +19,10 @@ module Api
     end
 
     def show
+      if @test_attempt.user_id != current_user.id
+        render json: { error: "Unauthorized" }, status: :unauthorized and return
+      end
+
       test_attempt = TestAttempt.includes(test_questions: :question).find(params[:id])
 
       render json: {
@@ -28,6 +35,7 @@ module Api
         end_time: test_attempt.end_time,
         answered_count: test_attempt.answered_count,
         test: {
+          pass_score: test_attempt.test.pass_score,
           id: test_attempt.test_id,
           lesson_id: test_attempt.test.lesson_id,
           duration_minutes: test_attempt.test.duration_minutes
@@ -42,7 +50,10 @@ module Api
     end
 
     def create
-      test = Test.find(params[:test_id])
+      test = Test.find_by(id: params[:test_id])
+      unless test
+        render json: { error: "Test not found" }, status: :not_found and return
+      end
       lesson_id = test.lesson_id
 
       # Step 1: Tạo test_attempt
@@ -51,6 +62,10 @@ module Api
         test_id: test.id,
         start_time: Time.current
       )
+
+      AutoSubmitTestAttemptJob.set(
+        wait_until: test_attempt.start_time + test.duration_minutes.minutes
+      ).perform_later(test_attempt.id)
 
       # Step 2: Lấy và chọn câu hỏi
       questions = Question.where(lesson_id: lesson_id)
@@ -87,19 +102,46 @@ module Api
         )
       end
 
-      # Step 4: Cập nhật total_score, pass_score nếu không đủ số lượng yêu cầu
-      if all_questions.size < 40
-        total = selected[:choice_matching].size * 2 + selected[:sorting].size * 3 + selected[:fill_blank].size * 3
-        test.update!(
-          total_score: total,
-          pass_score: (total * 0.75).round
-        )
-      end
+      # Step 4: Cập nhật total_score, pass_score
+      total = selected[:choice_matching].size * 2 + selected[:sorting].size * 3 + selected[:fill_blank].size * 3
+      test.update!(
+        total_score: total,
+        pass_score: (total * 0.75).round
+      )
 
       render json: { id: test_attempt.id }, status: :created
     end
 
+    def submit
+      if @test_attempt.user_id != current_user.id
+        render json: { error: "Unauthorized" }, status: :unauthorized and return
+      end
+
+      if @test_attempt.status != "in_progress"
+        render json: { error: "Bài đã được nộp hoặc bị bỏ dở" }, status: :unprocessable_entity
+        return
+      end
+
+      correct_count = TestAttemptSubmitter.new(@test_attempt).submit!(auto: false)
+
+      render json: {
+        message: "Đã nộp bài thành công",
+        status: @test_attempt.status,
+        score: @test_attempt.score,
+        answer_count: @test_attempt.answered_count,
+        correct_count: correct_count,
+        end_time: @test_attempt.end_time
+      }, status: :ok
+    end
+
     private
+
+    def set_test_attempt
+      @test_attempt = TestAttempt.find_by(id: params[:id])
+      unless @test_attempt
+        render json: { error: "TestAttempt not found" }, status: :not_found
+      end
+    end
 
     # Lấy danh sách câu hỏi không trùng key (ví dụ: vocabulary_id, phrase_id)
     def select_unique(scope, unique_keys, limit)

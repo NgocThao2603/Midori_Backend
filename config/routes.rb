@@ -1,6 +1,8 @@
 require "devise"
+require "sidekiq/web"
 
 Rails.application.routes.draw do
+  mount Sidekiq::Web => "/sidekiq"
   devise_for :users,
     path: "api",
     path_names: {
@@ -28,6 +30,7 @@ Rails.application.routes.draw do
     resources :test_attempts, only: [ :index, :show, :create ] do
       resources :test_answers, only: [ :index ]
       post "test_answers/update_or_create", to: "test_answers#update_or_create"
+      post "submit", on: :member
     end
 
     get "lessons/:lesson_id/tests", to: "tests#by_lesson"

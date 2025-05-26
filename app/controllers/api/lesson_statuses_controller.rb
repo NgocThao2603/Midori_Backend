@@ -43,6 +43,7 @@ module Api
       )
 
       status.done = true
+      status.done_at ||= Time.current
 
       if status.save
         render json: { message: "Status updated successfully" }, status: :ok
