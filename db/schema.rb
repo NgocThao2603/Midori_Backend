@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_26_084816) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_31_075236) do
   create_table "audio_files", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "vocabulary_id"
     t.bigint "phrase_id"
@@ -165,6 +165,18 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_084816) do
     t.index ["lesson_id"], name: "index_tests_on_lesson_id"
   end
 
+  create_table "user_daily_activities", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "activity_date", null: false
+    t.column "level", "enum('N3','N2','N1')", null: false
+    t.boolean "is_studied", default: false, null: false
+    t.integer "point_earned", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "activity_date", "level"], name: "idx_on_user_id_activity_date_level_7d348e5895", unique: true
+    t.index ["user_id"], name: "index_user_daily_activities_on_user_id"
+  end
+
   create_table "user_exercise_statuses", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "lesson_id", null: false
@@ -226,6 +238,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_26_084816) do
   add_foreign_key "test_questions", "questions"
   add_foreign_key "test_questions", "test_attempts"
   add_foreign_key "tests", "lessons"
+  add_foreign_key "user_daily_activities", "users"
   add_foreign_key "user_exercise_statuses", "lessons"
   add_foreign_key "user_exercise_statuses", "users"
   add_foreign_key "vocabularies", "lessons"
