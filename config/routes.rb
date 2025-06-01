@@ -32,12 +32,18 @@ Rails.application.routes.draw do
       post "test_answers/update_or_create", to: "test_answers#update_or_create"
       post "submit", on: :member
     end
+    resources :user_daily_activities, only: [ :index ] do
+      collection do
+        patch :mark_studied
+        patch :update_point
+      end
+    end
 
     get "lessons/:lesson_id/tests", to: "tests#by_lesson"
     get "profile", to: "users#profile"
     get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"
-    patch "lesson_statuses/:id", to: "lesson_statuses#update"
     get "lesson_meanings/lesson/:lesson_id", to: "lesson_meanings#index"
+    patch "lesson_statuses/:id", to: "lesson_statuses#update"
   end
   get "up" => "rails/health#show", as: :rails_health_check
 end

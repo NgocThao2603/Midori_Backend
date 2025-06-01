@@ -34,6 +34,7 @@ class TestAttemptSubmitter
 
     if status == "completed" && total_score >= @test_attempt.test.pass_score
       add_point_to_user!
+      add_daily_point!
       mark_lesson_test_done!
     end
 
@@ -45,6 +46,26 @@ class TestAttemptSubmitter
   def add_point_to_user!
     user = @test_attempt.user
     user.update!(point: user.point + @test_attempt.score.to_i)
+  end
+
+  def add_daily_point!
+    user = @test_attempt.user
+    level = @test_attempt.test.lesson.chapter.level
+    return if level.blank?
+
+    begin
+      activity = UserDailyActivity.find_or_create_by!(
+        user_id: user.id,
+        activity_date: Date.today,
+        level: level
+      )
+    rescue ActiveRecord::RecordNotUnique
+      # race condition khi find_or_create_by!
+      retry
+    end
+
+    new_earned_point = activity.point_earned.to_i + @test_attempt.score.to_i
+    activity.update!(point_earned: new_earned_point)
   end
 
   def mark_lesson_test_done!
