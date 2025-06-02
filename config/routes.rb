@@ -43,6 +43,8 @@ Rails.application.routes.draw do
     get "profile", to: "users#profile"
     get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"
     get "lesson_meanings/lesson/:lesson_id", to: "lesson_meanings#index"
+    get "/rankings/overall", to: "users#overall_ranking"
+    get "/rankings/level", to: "users#level_ranking"
     patch "lesson_statuses/:id", to: "lesson_statuses#update"
   end
   get "up" => "rails/health#show", as: :rails_health_check
