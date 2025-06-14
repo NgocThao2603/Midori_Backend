@@ -38,6 +38,7 @@ gem "bootsnap", require: false
 
 gem "devise"
 gem "devise-jwt"
+gem "natto"
 
 # Deploy this application anywhere as a Docker container [https://kamal-deploy.org]
 gem "kamal", require: false
