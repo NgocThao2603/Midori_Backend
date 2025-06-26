@@ -89,8 +89,8 @@ module HandleData
       nm.parse(text) do |n|
         next if n.is_eos?
 
-        surface = n.surface.strip
-        next if surface.empty? || %w[「 」].include?(surface)
+        surface = n.surface
+        next if surface.blank? || %w[「 」].include?(surface)
 
         features = n.feature.split(",")
         pos = features[0]
