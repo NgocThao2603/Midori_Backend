@@ -33,23 +33,26 @@ module AutoGenQuestion
 
         next if correct_answers.empty?
 
-        # Lấy thêm các distractor (câu sai), loại trừ prefix/suffix đang dùng
+        # Distractors
         distractors = Phrase.where.not(id: phrase.id)
                             .pluck(:prefix, :suffix)
                             .flatten
                             .compact
-                            .reject { |w| correct_answers.include?(w) }
+                            .reject { |w| w.blank? || correct_answers.include?(w) }
                             .uniq
                             .sample(6 - correct_answers.size)
 
         # Trộn các đáp án đúng và sai
         all_choices = (choices + distractors).shuffle
 
-        # Tạo câu hỏi
+        # Validate lại cho chắc chắn
+        next if all_choices.any?(&:blank?)
+
+        # Tạo câu hỏi + lựa chọn
         Question.create!(
           lesson: @lesson,
           question_type: "matching",
-          question: "#{hidden_phrase}",
+          question: hidden_phrase,
           phrase: phrase,
           correct_answers: correct_answers
         ).tap do |question|

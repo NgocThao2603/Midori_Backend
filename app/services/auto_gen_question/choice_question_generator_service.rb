@@ -75,6 +75,23 @@ module AutoGenQuestion
     end
 
     def create_choice_question(lesson:, question_text:, correct_choice:, wrong_choices:, vocabulary: nil, phrase: nil, example: nil, hidden_part: nil)
+      # Bước 1: Validate dữ liệu trước khi tạo bất cứ bản ghi nào
+      return if correct_choice.blank?
+
+      # Xóa các đáp án sai bị nil hoặc trùng với đáp án đúng
+      wrong_choices = wrong_choices.reject { |w| w.blank? || w == correct_choice }
+
+      # Nếu còn < 3 đáp án sai, không đủ để tạo câu hỏi => bỏ qua
+      return if wrong_choices.size < 3
+
+      # Lấy ngẫu nhiên 3 đáp án sai
+      selected_wrongs = wrong_choices.sample(3)
+
+      # Gộp lại với đáp án đúng
+      all_choices = ([ { choice: correct_choice, is_correct: true } ] +
+                    selected_wrongs.map { |w| { choice: w, is_correct: false } }).shuffle
+
+      # Bước 2: Tạo question
       question = Question.create!(
         lesson: lesson,
         question_type: "choice",
@@ -82,13 +99,9 @@ module AutoGenQuestion
         vocabulary: vocabulary,
         phrase: phrase,
         example: example,
-        correct_answers: [correct_choice],
+        correct_answers: [ correct_choice ],
         hidden_part: hidden_part
       )
-
-      # Shuffle cả đúng và sai
-      all_choices = ([ { choice: correct_choice, is_correct: true } ] +
-                    wrong_choices.map { |w| { choice: w, is_correct: false } }).shuffle
 
       all_choices.each do |c|
         Choice.create!(question: question, choice: c[:choice], is_correct: c[:is_correct])

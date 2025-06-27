@@ -14,15 +14,7 @@ class Api::QuestionsController < ApplicationController
                   questions
                 end
 
-      questions = questions.map do |question|
-        if question.question_type == "fill_blank"
-          question.as_json(except: [ :choices, :example_tokens ])
-        else
-          question
-        end
-      end
-
-      render json: questions, include: [ "choices", "example_tokens" ], status: :ok
+      render json: questions, status: :ok
     else
       render json: { error: "lesson_id is required" }, status: :unprocessable_entity
     end
@@ -57,8 +49,8 @@ class Api::QuestionsController < ApplicationController
 
   def select_practice_example_questions(questions)
     max_questions = 20
-    sort_total = 12
-    fill_blank_total = 8
+    sort_total = max_questions * 3/5
+    fill_blank_total = max_questions - sort_total
 
     used_example_ids = Set.new
 
@@ -69,7 +61,7 @@ class Api::QuestionsController < ApplicationController
       .transform_values { |group| group.sample }
       .values
 
-    selected_sorting = sorting_questions.sample([sorting_questions.size, sort_total].min)
+    selected_sorting = sorting_questions.sample([ sorting_questions.size, sort_total ].min)
     used_example_ids.merge(selected_sorting.map(&:example_id))
 
     # Lấy fill_blank questions, loại trừ các example_id đã dùng
@@ -80,7 +72,7 @@ class Api::QuestionsController < ApplicationController
       .transform_values { |group| group.sample }
       .values
 
-    selected_fill_blank = fill_blank_questions.sample([fill_blank_questions.size, fill_blank_total].min)
+    selected_fill_blank = fill_blank_questions.sample([ fill_blank_questions.size, fill_blank_total ].min)
 
     (selected_sorting + selected_fill_blank).shuffle
   end
