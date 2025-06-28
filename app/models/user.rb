@@ -14,4 +14,10 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
   validates :password, presence: true, length: { minimum: 6 }, on: :create
+
+  after_initialize :set_default_avatar, if: :new_record?
+
+  def set_default_avatar
+    self.avatar_url ||= "/avatars/avatar.svg"
+  end
 end

@@ -40,12 +40,13 @@ Rails.application.routes.draw do
     end
 
     get "lessons/:lesson_id/tests", to: "tests#by_lesson"
-    get "profile", to: "users#profile"
+    get "users", to: "users#profile"
     get "vocabularies/lesson/:lesson_id", to: "vocabularies#by_lesson"
     get "lesson_meanings/lesson/:lesson_id", to: "lesson_meanings#index"
     get "/rankings/overall", to: "users#overall_ranking"
     get "/rankings/level", to: "users#level_ranking"
     patch "lesson_statuses/:id", to: "lesson_statuses#update"
+    patch "users", to: "users#update"
   end
   get "up" => "rails/health#show", as: :rails_health_check
 end
