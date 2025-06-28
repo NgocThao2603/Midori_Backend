@@ -16,6 +16,7 @@ module GrBackend
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
     config.active_job.queue_adapter = :sidekiq
+    config.time_zone = "Asia/Ho_Chi_Minh"
 
     # Configuration for the application, engines, and railties goes here.
     #

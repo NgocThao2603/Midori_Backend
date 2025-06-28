@@ -23,7 +23,9 @@ module Api
               main_word: phrase.main_word,
               prefix: phrase.prefix,
               suffix: phrase.suffix,
-              meaning: phrase.meaning
+              meaning: phrase.meaning,
+              phrase_type: phrase.phrase_type,
+              furigana: phrase.furigana
             }
           end
         }
