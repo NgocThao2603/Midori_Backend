@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_28_083022) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_01_113519) do
   create_table "audio_files", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "vocabulary_id"
     t.bigint "phrase_id"
@@ -217,6 +217,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_28_083022) do
     t.string "word_type", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "stt"
     t.index ["lesson_id"], name: "index_vocabularies_on_lesson_id"
   end
 

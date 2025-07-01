@@ -11,6 +11,7 @@ module Api
       vocabularies = lesson.vocabularies.includes(:meanings, :phrases).map do |vocab|
         {
           id: vocab.id,
+          stt: vocab.stt,
           kanji: vocab.kanji,
           hanviet: vocab.hanviet,
           kana: vocab.kana,
@@ -19,6 +20,7 @@ module Api
           phrases: vocab.phrases.map do |phrase|
             {
               id: phrase.id,
+              vocab_stt: vocab.stt,
               phrase: phrase.phrase,
               main_word: phrase.main_word,
               prefix: phrase.prefix,
