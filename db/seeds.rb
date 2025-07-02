@@ -1,15 +1,16 @@
 require 'csv'
 require 'json'
 
-# Xóa dữ liệu cũ
-Chapter.destroy_all
-Lesson.destroy_all
-Vocabulary.destroy_all
-Meaning.destroy_all
-Example.destroy_all
+# # Xóa dữ liệu cũ
+# Chapter.destroy_all
+# Lesson.destroy_all
+# Vocabulary.destroy_all
+# Meaning.destroy_all
+# Example.destroy_all
 
 # Định nghĩa danh sách chapters
 chapters_data = [
+  # N2 chapters
   { title: "Unit 01 - 名詞A", level: "N2", range: (1..100) },
   { title: "Unit 02 - 動詞A", level: "N2", range: (101..220) },
   { title: "Unit 03 - 形容詞A", level: "N2", range: (221..270) },
@@ -24,11 +25,44 @@ chapters_data = [
   { title: "Unit 10 - 形容詞B", level: "N2", range: (841..890) },
   { title: "Unit 11 - 名詞D", level: "N2", range: (891..990) },
   { title: "Unit 12 - 動詞C", level: "N2", range: (991..1090) },
-  { title: "Unit 13 - 副詞＋連体詞", level: "N2", range: (1091..1160) }
+  { title: "Unit 13 - 副詞＋連体詞", level: "N2", range: (1091..1160) },
+
+  # N3 chapters
+  { title: "Unit 01 - 名詞A", level: "N3", range: (1..120) },
+  { title: "Unit 02 - 動詞A", level: "N3", range: (121..220) },
+  { title: "まとめ - 連用名詞", level: "N3", range: (221..258) },
+  { title: "Unit 03 - 形容詞A", level: "N3", range: (259..298) },
+  { title: "まとめ - イ形容詞＋まる／める", level: "N3", range: (299..310) },
+  { title: "Unit 04 - 名詞B", level: "N3", range: (311..410) },
+  { title: "Unit 05 - 動詞B", level: "N3", range: (411..510) },
+  { title: "Unit 06 - カタカナA", level: "N3", range: (511..550) },
+  { title: "Unit 07 - 形容詞B", level: "N3", range: (551..590) },
+  { title: "Unit 08 - 副詞A ", level: "N3", range: (591..635) },
+  { title: "Unit 09 - 名詞C", level: "N3", range: (636..715) },
+  { title: "Unit 10 - 動詞C", level: "N3", range: (716..795) },
+  { title: "Unit 11 - カタカナB", level: "N3", range: (796..835) },
+  { title: "まとめ - 料理の動詞", level: "N3", range: (836..845) },
+  { title: "Unit 12 - 副詞B、連体詞・接続詞", level: "N3", range: (846..880) },
+
+  # N1 chapters
+  { title: "Unit 01 - 名詞A", level: "N1", range: (1..100) },
+  { title: "Unit 02 - 動詞A", level: "N1", range: (101..190) },
+  { title: "Unit 03 - 形容詞A", level: "N1", range: (191..280) },
+  { title: "Unit 04 - 名詞B", level: "N1", range: (281..380) },
+  { title: "Unit 05 - 複合動詞", level: "N1", range: (381..480) },
+  { title: "Unit 06 - カタカナA", level: "N1", range: (481..530) },
+  { title: "Unit 07 - 副詞A＋接続詞", level: "N1", range: (531..600) },
+  { title: "Unit 08 - 名詞C", level: "N1", range: (601..700) },
+  { title: "Unit 09 - 動詞B", level: "N1", range: (701..800) },
+  { title: "Unit 10 - カタカナB", level: "N1", range: (801..850) },
+  { title: "Unit 11 - 形容詞B", level: "N1", range: (851..930) },
+  { title: "Unit 12 - 名詞D", level: "N1", range: (931..1020) },
+  { title: "Unit 13 - 動詞C", level: "N1", range: (1021..1110) },
+  { title: "Unit 14 - 副詞B＋連体詞", level: "N1", range: (1111..1170) }
 ]
 
 # Đọc dữ liệu CSV
-csv_path = Rails.root.join('db/data/n2.csv')
+csv_path = Rails.root.join('db/data/n1.csv')
 csv_data = CSV.read(csv_path, headers: true)
 
 def create_phrase_with_translation(phrase_text, vocabulary, prefix, suffix, phrase_type)
@@ -55,12 +89,21 @@ end
 
 # Tạo dữ liệu
 chapters_data.each do |data|
-  chapter = Chapter.create!(title: data[:title], level: data[:level])
+  chapter = Chapter.find_or_initialize_by(title: data[:title], level: data[:level])
+  chapter.save! unless chapter.persisted?
 
   vocab_count = data[:range].size
   lesson_size = case chapter.title
+  # N2
   when "Unit 07 - 名詞C" then 7
   when "まとめ2 - 同じ漢字を含む名詞" then (vocab_count.to_f / 15).ceil
+
+  # N3
+  when "まとめ - イ形容詞＋まる／める" then 1
+  when "Unit 12 - 副詞B、連体詞・接続詞" then 3
+  when "Unit 08 - 副詞A" then (vocab_count.to_f / 15).ceil
+
+  # N1
   else (vocab_count.to_f / 10).ceil
   end
 
@@ -68,7 +111,8 @@ chapters_data.each do |data|
   vocab_ids = data[:range].to_a
 
   vocab_ids.each_slice(words_per_lesson).with_index(1) do |lesson_vocab, index|
-    lesson = chapter.lessons.create!(title: "Bài #{index}")
+    lesson = chapter.lessons.find_or_initialize_by(title: "Bài #{index}")
+    lesson.save! unless lesson.persisted?
 
     lesson_vocab.each do |vocab_id|
       row = csv_data.find { |r| r["stt"].to_i == vocab_id }
@@ -86,28 +130,44 @@ chapters_data.each do |data|
           "Động từ ghép"
         elsif chapter.title.include?("カタカナ")
           "Katakana"
-        elsif chapter.title.include?("副詞＋接続詞")
+        elsif chapter.title.include?("副詞B、連体詞・接続詞")
+          "Phó từ/ Liên (thể ) từ"
+        elsif [ "副詞＋接続詞", "＋接続詞" ].any? { |phrase| chapter.title.include?(phrase) }
           "Phó từ/ Liên từ"
-        elsif chapter.title.include?("副詞＋連体詞")
+        elsif [ "副詞＋連体詞", "＋連体詞" ].any? { |phrase| chapter.title.include?(phrase) }
           "Phó từ/ Liên thể từ"
+        elsif chapter.title.include?("副詞")
+          "Phó từ"
         else
           "Khác"
         end
 
-      PHRASE_TYPES = [ "関", "類", "合", "連", "対", "名" ]
+      PHRASE_TYPES = [ "関", "類", "合", "連", "対", "名", "慣" ]
 
       # Tạo từ vựng
-      vocabulary = lesson.vocabularies.create!(
+      # vocabulary = lesson.vocabularies.create!(
+      #   stt: row["stt"].to_i,
+      #   kanji: row["word"],
+      #   hanviet: row["Sino-Vietnamese"],
+      #   kana: row["furigana"],
+      #   word_type: word_type
+      # )
+
+      vocabulary = lesson.vocabularies.find_or_initialize_by(stt: row["stt"].to_i)
+      vocabulary.assign_attributes(
         kanji: row["word"],
         hanviet: row["Sino-Vietnamese"],
         kana: row["furigana"],
         word_type: word_type
       )
+      vocabulary.save!
 
       # Xử lý nhiều nghĩa
       meanings = row["meaning"].to_s.split(',').map(&:strip)
       meanings.each do |meaning|
-        vocabulary.meanings.create!(meaning: meaning)
+        unless vocabulary.meanings.exists?(meaning: meaning)
+          vocabulary.meanings.create!(meaning: meaning)
+        end
       end
 
       # Tạo ví dụ
@@ -136,27 +196,50 @@ chapters_data.each do |data|
       examples_data = row["example"].present? ? safe_parse_json(row["example"]) : []
       valid_examples = examples_data.select do |example_pair|
         example_pair.is_a?(Array) && example_pair.size == 2 &&
-        !example_pair[0].start_with?("関 ", "類 ", "合 ", "連 ", "対 ", "名 ") &&
+        !example_pair[0].start_with?("関 ", "類 ", "合 ", "連 ", "対 ", "名 ", "慣 ") &&
         !example_pair[0].include?("＿") &&
         example_pair[1].is_a?(String) && !example_pair[1].strip.empty?
       end
 
+      # valid_examples.each do |example_pair|
+      #   clean_jp = example_pair[0].sub(/^\d+\.\s*/, "")
+
+      #   example = vocabulary.examples.create!(
+      #     example_sentence: clean_jp,
+      #     meaning_sentence: example_pair[1]
+      #   )
+
+      #   tokens = HandleData::TokenizerService.tokenize(example.example_sentence)
+      #   tokens.each do |token|
+      #     next if token[:surface].blank?
+      #     ExampleToken.create!(
+      #       example_id: example.id,
+      #       token_index: token[:index],
+      #       jp_token: token[:surface],
+      #       vn_token: HandleData::TranslationService.translate_to_vietnamese(token[:surface])
+      #     )
+      #   end
+      # end
+
       valid_examples.each do |example_pair|
         clean_jp = example_pair[0].sub(/^\d+\.\s*/, "")
+        meaning_jp = example_pair[1]
 
-        example = vocabulary.examples.create!(
-          example_sentence: clean_jp,
-          meaning_sentence: example_pair[1]
-        )
+        example = vocabulary.examples.find_or_initialize_by(example_sentence: clean_jp)
+        example.meaning_sentence = meaning_jp
+        example.save!
 
-        tokens = HandleData::TokenizerService.tokenize(example.example_sentence)
-        tokens.each do |token|
-          ExampleToken.create!(
-            example_id: example.id,
-            token_index: token[:index],
-            jp_token: token[:surface],
-            vn_token: HandleData::TranslationService.translate_to_vietnamese(token[:surface])
-          )
+        unless example.example_tokens.exists?
+          tokens = HandleData::TokenizerService.tokenize(example.example_sentence)
+          tokens.each do |token|
+            next if token[:surface].blank?
+
+            example.example_tokens.create!(
+              token_index: token[:index],
+              jp_token: token[:surface],
+              vn_token: HandleData::TranslationService.translate_to_vietnamese(token[:surface])
+            )
+          end
         end
       end
 
@@ -224,7 +307,7 @@ chapters_data.each do |data|
           phrase_parts.each do |phrase_part|
             next if phrase_part.empty?
             
-            if phrase_part.include?("＜＝＞") || phrase_part.include?("・")
+            if phrase_part =~ /＜＝＞|<=>/ || phrase_part.include?("・")
               process_contrast_phrase(phrase_part, phrase_meaning, phrase_type, vocabulary)
             elsif phrase_part.include?("＿")
               process_underscore_phrase(phrase_part, phrase_meaning, phrase_type, vocabulary)
@@ -288,9 +371,9 @@ chapters_data.each do |data|
       def process_contrast_phrase(phrase_part, phrase_meaning, phrase_type, vocabulary)
         # Xử lý pattern có <=> hoặc ・
         if phrase_part.include?("＿")
-          if phrase_part.include?("＜＝＞")
+          if phrase_part =~ /＜＝＞|<=>/
             # Có ＿ và <=> 
-            contrast_parts = phrase_part.split(/＜＝＞/).map(&:strip)
+            contrast_parts = phrase_part.split(/＜＝＞|<=>/).map(&:strip)
             
             if contrast_parts.length == 2
               first_part = contrast_parts[0]
@@ -404,9 +487,9 @@ chapters_data.each do |data|
           end
         else
           # Không có ＿
-          if phrase_part.include?("＜＝＞")
+          if phrase_part =~ /＜＝＞|<=>/
             # Không có ＿ nhưng có <=> - VD: "好況＜＝＞不況"
-            contrasts = phrase_part.split(/＜＝＞/).map(&:strip)
+            contrasts = phrase_part.split(/＜＝＞|<=>/).map(&:strip)
             contrasts.each do |contrast|
               next if contrast.empty?
               create_phrase_with_translation(
@@ -457,7 +540,7 @@ chapters_data.each do |data|
         prefix = parts[0].presence
         suffix = parts[1].presence
 
-        phrase_text = [prefix, vocabulary.kanji, suffix].compact.join
+        phrase_text = [ prefix, vocabulary.kanji, suffix ].compact.join
 
         create_phrase_with_translation(
           phrase_text,
@@ -472,6 +555,32 @@ chapters_data.each do |data|
       process_phrases(examples_data, vocabulary)
     end
   end
+end
+
+# ==========================================================================
+Lesson.find_each do |lesson|
+# Lesson.joins(:chapter).where(chapters: { level: "N1" }).find_each do |lesson|
+  begin
+    puts "Processing Lesson ID: #{lesson.id}"
+
+    AutoGenQuestion::MatchQuestionGeneratorService.new(lesson).call
+    AutoGenQuestion::ChoiceQuestionGeneratorService.new(lesson).call
+    AutoGenQuestion::SortQuestionGeneratorService.new(lesson).call
+    AutoGenQuestion::FillBlankQuestionGeneratorService.new(lesson).call
+
+    puts "Generated questions for Lesson ID: #{lesson.id}"
+  rescue => e
+    puts "Skipped Lesson ID: #{lesson.id} due to error: #{e.message}"
+  end
+end
+# ==========================================================================
+
+Lesson.find_each do |lesson|
+  Test.create!(
+    lesson: lesson,
+    title: "Bài test 1",
+    duration_minutes: 20
+  )
 end
 
 puts "Seeding completed!"
