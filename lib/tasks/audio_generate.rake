@@ -5,7 +5,7 @@ namespace :audio do
     base_audio_path = "../midori-audio/public/audios"
 
     # === Vocabularies
-    vocabularies = Vocabulary.where("lesson_id >= ?", 38)
+    vocabularies = Vocabulary.where("lesson_id >= ?", 113)
 
     vocabularies.find_each do |vocab|
       unless AudioFile.exists?(vocabulary_id: vocab.id)
