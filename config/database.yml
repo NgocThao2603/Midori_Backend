@@ -52,17 +52,15 @@ production:
   primary: &primary_production
     <<: *default
     database: midori_backend_production
-    username: midori_backend
-    password: <%= ENV["GR_BACKEND_DATABASE_PASSWORD"] %>
+    username: app_user
+    password: 123456
+    host: mysql
   cache:
     <<: *primary_production
     database: midori_backend_production_cache
-    migrations_paths: db/cache_migrate
   queue:
     <<: *primary_production
     database: midori_backend_production_queue
-    migrations_paths: db/queue_migrate
   cable:
     <<: *primary_production
     database: midori_backend_production_cable
-    migrations_paths: db/cable_migrate
